@@ -2802,9 +2802,105 @@ function handleNewDesign(prompt_) {
     window._lastNewDesignBOM = bomItems;
   })
   .catch(function(e) {
-    _llmErrorToast(e);
-    chat('Could not generate design — ' + (e.message || 'try again'), 'ai', 'BUILD');
+    // LLM unavailable — use hardcoded template fallback so demo still works
+    var fallback = _templateFallbackBOM(q);
+    if (fallback) {
+      var bW = 60, bH = 40;
+      if (window.rebuildBoard) window.rebuildBoard(fallback.bom, bW, bH, 'PENDING', 78);
+      document.getElementById('vhud').style.display = '';
+      document.getElementById('hud-board').textContent = bW + 'x' + bH + 'mm';
+      var _cc = document.getElementById('hud-count-card');
+      if (_cc) { _cc.style.display = ''; document.getElementById('hud-count').textContent = fallback.bom.length; var _cf = _estimateBOMCost(fallback.bom); document.getElementById('hud-count-sub').textContent = '~$' + _cf.toFixed(2) + ' est.'; }
+      document.getElementById('proj-name').textContent = fallback.name;
+      var _d2 = document.getElementById('mfr-dot'), _l2 = document.getElementById('mfr-lbl');
+      if (_d2) _d2.className = 'dot dot-ok'; if (_l2) _l2.textContent = 'FAB READY';
+      window._boardName = fallback.name; window._boardW = bW; window._boardH = bH;
+      setFooterActions('pcb');
+      chat('&#9965; <strong>' + fallback.name + '</strong> — <strong>' + fallback.bom.length + ' components</strong> built from template.<br><span style="font-size:10px;color:var(--dim)">AI unavailable — using template BOM. Ask me to customize it.</span>', 'ai', 'BUILD');
+    } else {
+      _llmErrorToast(e);
+      chat('Could not generate design — ' + (e.message || 'try again'), 'ai', 'BUILD');
+    }
   });
+}
+
+function _templateFallbackBOM(prompt) {
+  var p = (prompt || '').toLowerCase();
+  var isMacro  = /macropad|keyboard|key matrix|rp2040|rgb led/i.test(p);
+  var isBadge  = /badge|ble|nrf|e-ink|e-paper|eink|wireless display/i.test(p);
+  var isDrone  = /drone|flight|esc|quadrotor|motor control|stm32f4/i.test(p);
+  var isSensor = /sensor|esp32|bme|temperature|humidity|lipo|oled/i.test(p);
+  if (!isMacro && !isBadge && !isDrone && !isSensor) return null;
+  if (isDrone) return {
+    name: 'FlightCtrl-v1',
+    bom: [
+      { value: 'STM32F405', references: ['U1'], category: 'ic', quantity: 1, footprint: 'LQFP-64' },
+      { value: 'MPU-6000',  references: ['U2'], category: 'sensor', quantity: 1, footprint: 'QFN-24' },
+      { value: 'BMP280',    references: ['U3'], category: 'sensor', quantity: 1, footprint: 'LGA-8' },
+      { value: 'BEC 5V',    references: ['U4'], category: 'ic', quantity: 1, footprint: 'SOT-223' },
+      { value: 'IRLR7843',  references: ['Q1','Q2','Q3','Q4'], category: 'mosfet', quantity: 4, footprint: 'DPAK' },
+      { value: '10R',       references: ['R1','R2','R3','R4'], category: 'resistor', quantity: 4, footprint: '0402' },
+      { value: '10K',       references: ['R5','R6','R7'],      category: 'resistor', quantity: 3, footprint: '0402' },
+      { value: '100nF',     references: ['C1','C2','C3','C4'], category: 'capacitor', quantity: 4, footprint: '0402' },
+      { value: '470uF',     references: ['C5','C6'],           category: 'capacitor', quantity: 2, footprint: '1210' },
+      { value: 'XT60 BAT',  references: ['J1'],                category: 'connector', quantity: 1, footprint: 'XT60' },
+      { value: 'M1-M4 PWM', references: ['J2','J3','J4','J5'], category: 'connector', quantity: 4, footprint: 'JST-SH' },
+      { value: 'USB-C',     references: ['J6'],                category: 'connector', quantity: 1, footprint: 'USB_C' },
+    ]
+  };
+  if (isMacro) return {
+    name: 'Macropad-v1',
+    bom: [
+      { value: 'RP2040',        references: ['U1'],                category: 'ic',        quantity: 1, footprint: 'QFN-56' },
+      { value: 'W25Q16',        references: ['U2'],                category: 'ic',        quantity: 1, footprint: 'SOP-8' },
+      { value: 'WS2812B',       references: ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12'], category: 'led', quantity: 12, footprint: 'LED_5050' },
+      { value: 'MX Switch',     references: ['SW1','SW2','SW3','SW4','SW5','SW6','SW7','SW8','SW9','SW10','SW11','SW12'], category: 'other', quantity: 12, footprint: 'MX_Switch' },
+      { value: '1N4148',        references: ['D13','D14','D15','D16','D17','D18','D19','D20','D21','D22','D23','D24'], category: 'diode', quantity: 12, footprint: 'SOD-123' },
+      { value: '27R',           references: ['R1','R2'],           category: 'resistor',  quantity: 2, footprint: '0402' },
+      { value: '10K',           references: ['R3','R4'],           category: 'resistor',  quantity: 2, footprint: '0402' },
+      { value: '100nF',         references: ['C1','C2','C3'],      category: 'capacitor', quantity: 3, footprint: '0402' },
+      { value: '10uF',          references: ['C4'],                category: 'capacitor', quantity: 1, footprint: '0805' },
+      { value: 'USB-C',         references: ['J1'],                category: 'connector', quantity: 1, footprint: 'USB_C' },
+      { value: 'BOOT BTN',      references: ['SW13'],              category: 'other',     quantity: 1, footprint: 'SW_6mm' },
+      { value: 'RESET BTN',     references: ['SW14'],              category: 'other',     quantity: 1, footprint: 'SW_6mm' },
+    ]
+  };
+  if (isBadge) return {
+    name: 'BLEbadge-v1',
+    bom: [
+      { value: 'nRF52840',      references: ['U1'],                category: 'ic',        quantity: 1, footprint: 'QFAA' },
+      { value: 'SSD1681 e-ink', references: ['U2'],                category: 'ic',        quantity: 1, footprint: 'FPC-24' },
+      { value: 'MCP73831',      references: ['U3'],                category: 'ic',        quantity: 1, footprint: 'SOT-23-5' },
+      { value: 'AP2112K-3.3',   references: ['U4'],                category: 'ic',        quantity: 1, footprint: 'SOT-23-5' },
+      { value: 'WS2812B',       references: ['D1'],                category: 'led',       quantity: 1, footprint: 'LED_5050' },
+      { value: '10K',           references: ['R1','R2','R3'],      category: 'resistor',  quantity: 3, footprint: '0402' },
+      { value: '1M',            references: ['R4'],                category: 'resistor',  quantity: 1, footprint: '0402' },
+      { value: '100nF',         references: ['C1','C2','C3','C4'], category: 'capacitor', quantity: 4, footprint: '0402' },
+      { value: '10uF',          references: ['C5','C6'],           category: 'capacitor', quantity: 2, footprint: '0805' },
+      { value: 'USB-C',         references: ['J1'],                category: 'connector', quantity: 1, footprint: 'USB_C' },
+      { value: 'JST-PH LiPo',  references: ['J2'],                category: 'connector', quantity: 1, footprint: 'JST-PH' },
+      { value: 'BTN A/B',       references: ['SW1','SW2'],         category: 'other',     quantity: 2, footprint: 'SW_6mm' },
+    ]
+  };
+  // default: sensor node
+  return {
+    name: 'SensorNode-v1',
+    bom: [
+      { value: 'ESP32-WROOM-32', references: ['U1'],               category: 'ic',        quantity: 1, mpn: 'ESP32-WROOM-32D', footprint: 'WROOM' },
+      { value: 'AMS1117-3.3',    references: ['U2'],               category: 'ic',        quantity: 1, footprint: 'SOT-223' },
+      { value: 'BME280',         references: ['U3'],               category: 'sensor',    quantity: 1, footprint: 'LGA-8' },
+      { value: 'SSD1306 OLED',   references: ['U4'],               category: 'ic',        quantity: 1, footprint: 'SOP-20' },
+      { value: 'TP4056',         references: ['U5'],               category: 'ic',        quantity: 1, footprint: 'SOP-8' },
+      { value: '150R',           references: ['R1'],               category: 'resistor',  quantity: 1, footprint: '0603' },
+      { value: '10K',            references: ['R2','R3','R4'],     category: 'resistor',  quantity: 3, footprint: '0402' },
+      { value: '100nF',          references: ['C1','C2','C3','C4','C5'], category: 'capacitor', quantity: 5, footprint: '0402' },
+      { value: '10uF',           references: ['C6','C7'],          category: 'capacitor', quantity: 2, footprint: '0805' },
+      { value: 'USB-C',          references: ['J1'],               category: 'connector', quantity: 1, footprint: 'USB_C' },
+      { value: 'JST-PH LiPo',   references: ['J2'],               category: 'connector', quantity: 1, footprint: 'JST-PH' },
+      { value: 'LED RED',        references: ['D1'],               category: 'led',       quantity: 1, footprint: '0603' },
+      { value: 'RESET BTN',      references: ['SW1'],              category: 'other',     quantity: 1, footprint: 'SW_6mm' },
+    ]
+  };
 }
 
 // ── FILE HANDLING ─────────────────────────────────────
@@ -2914,6 +3010,66 @@ window.runValidate = function() {
 
 function runValidateDemo(id) {
   var isDrone = id === 'quadforge';
+  var bW = isDrone ? 80 : 60, bH = isDrone ? 60 : 40;
+
+  var demoBOM = isDrone ? [
+    { value: 'STM32F405RGT6', references: ['U1'], category: 'ic',        quantity: 1, mpn: 'STM32F405RGT6', footprint: 'LQFP-64' },
+    { value: 'MPU-6000',      references: ['U2'], category: 'sensor',    quantity: 1, mpn: 'MPU-6000',     footprint: 'QFN-24' },
+    { value: 'BMP280',        references: ['U3'], category: 'sensor',    quantity: 1, mpn: 'BMP280',       footprint: 'LGA-8' },
+    { value: 'AT7456E',       references: ['U4'], category: 'ic',        quantity: 1, mpn: 'AT7456E',      footprint: 'SSOP-28' },
+    { value: 'BEC 5V/3A',     references: ['U5'], category: 'ic',        quantity: 1,                    footprint: 'SOT-223' },
+    { value: 'IRLR7843',      references: ['Q1','Q2','Q3','Q4'], category: 'mosfet', quantity: 4, mpn: 'IRLR7843', footprint: 'DPAK' },
+    { value: '10R',           references: ['R1','R2','R3','R4'], category: 'resistor', quantity: 4, footprint: '0402' },
+    { value: '0.001R',        references: ['R5','R6'],           category: 'resistor', quantity: 2, footprint: '2512' },
+    { value: '10K',           references: ['R7','R8','R9'],      category: 'resistor', quantity: 3, footprint: '0402' },
+    { value: '100nF',         references: ['C1','C2','C3','C4','C5','C6'], category: 'capacitor', quantity: 6, footprint: '0402' },
+    { value: '470uF 25V',     references: ['C7','C8'],           category: 'capacitor', quantity: 2, footprint: '1210' },
+    { value: '10uF',          references: ['C9','C10'],          category: 'capacitor', quantity: 2, footprint: '0805' },
+    { value: 'XT60 BAT',      references: ['J1'],                category: 'connector', quantity: 1, footprint: 'XT60' },
+    { value: 'M1-M4 PWM',     references: ['J2','J3','J4','J5'], category: 'connector', quantity: 4, footprint: 'JST-SH' },
+    { value: 'GPS UART',      references: ['J6'],                category: 'connector', quantity: 1, footprint: 'JST-SH' },
+    { value: 'USB-C',         references: ['J7'],                category: 'connector', quantity: 1, footprint: 'USB_C' },
+    { value: 'BOOT BTN',      references: ['SW1'],               category: 'other',     quantity: 1, footprint: 'SW_6mm' },
+  ] : [
+    { value: 'ESP32-WROOM-32',  references: ['U1'], category: 'ic',        quantity: 1, mpn: 'ESP32-WROOM-32D', footprint: 'WROOM' },
+    { value: 'AMS1117-3.3',     references: ['U2'], category: 'ic',        quantity: 1, mpn: 'AMS1117-3.3',    footprint: 'SOT-223' },
+    { value: 'BME280',          references: ['U3'], category: 'sensor',    quantity: 1, mpn: 'BME280',         footprint: 'LGA-8' },
+    { value: 'SSD1306 OLED',    references: ['U4'], category: 'ic',        quantity: 1, mpn: 'SSD1306',        footprint: 'SOP-20' },
+    { value: 'TP4056',          references: ['U5'], category: 'ic',        quantity: 1, mpn: 'TP4056',         footprint: 'SOP-8' },
+    { value: '150R',            references: ['R1'],          category: 'resistor',  quantity: 1, footprint: '0603' },
+    { value: '10K',             references: ['R2','R3','R4'], category: 'resistor',  quantity: 3, footprint: '0402' },
+    { value: '4.7K',            references: ['R5','R6'],      category: 'resistor',  quantity: 2, footprint: '0402' },
+    { value: '100nF',           references: ['C1','C2','C3','C4','C5'], category: 'capacitor', quantity: 5, footprint: '0402' },
+    { value: '10uF',            references: ['C6','C7'],      category: 'capacitor', quantity: 2, footprint: '0805' },
+    { value: '100uF',           references: ['C8'],           category: 'capacitor', quantity: 1, footprint: '1210' },
+    { value: 'LED RED',         references: ['D1'],           category: 'led',       quantity: 1, footprint: '0603' },
+    { value: 'LED YLW',         references: ['D2'],           category: 'led',       quantity: 1, footprint: '0603' },
+    { value: 'USB-C',           references: ['J1'],           category: 'connector', quantity: 1, footprint: 'USB_C' },
+    { value: 'JST-PH 2-pin',    references: ['J2'],           category: 'connector', quantity: 1, footprint: 'JST-PH' },
+    { value: 'Debug HDR',       references: ['J3'],           category: 'connector', quantity: 1, footprint: 'HDR_4' },
+    { value: 'RESET BTN',       references: ['SW1'],          category: 'other',     quantity: 1, footprint: 'SW_6mm' },
+    { value: 'BOOT BTN',        references: ['SW2'],          category: 'other',     quantity: 1, footprint: 'SW_6mm' },
+  ];
+
+  // Render 3D board
+  if (window.rebuildBoard) window.rebuildBoard(demoBOM, bW, bH, isDrone ? 'PENDING' : 'GO', isDrone ? 72 : 85);
+  document.getElementById('vhud').style.display = '';
+  document.getElementById('hud-board').textContent = bW + 'x' + bH + 'mm';
+  var cntCard = document.getElementById('hud-count-card');
+  if (cntCard) {
+    cntCard.style.display = '';
+    document.getElementById('hud-count').textContent = demoBOM.length;
+    var _ce = typeof _estimateBOMCost === 'function' ? _estimateBOMCost(demoBOM) : 0;
+    document.getElementById('hud-count-sub').textContent = _ce > 0 ? '~$' + _ce.toFixed(2) + ' est.' : demoBOM.length + ' parts';
+  }
+  document.getElementById('proj-name').textContent = isDrone ? 'QuadForge-v1' : 'DeskSense-v1';
+  var _dot = document.getElementById('mfr-dot'), _lbl = document.getElementById('mfr-lbl');
+  if (_dot) _dot.className = 'dot ' + (isDrone ? 'dot-warn' : 'dot-ok');
+  if (_lbl) _lbl.textContent = isDrone ? 'DFM REVIEW' : 'FAB READY';
+  window._boardName = isDrone ? 'QuadForge-v1' : 'DeskSense-v1';
+  window._boardW = bW; window._boardH = bH;
+  setFooterActions('pcb');
+
   applyValidation({
     validation: {
       issues: isDrone ? [
@@ -2921,13 +3077,13 @@ function runValidateDemo(id) {
         { severity: 'error',    component: 'U3_5V',  issue: 'Buck converter output droop: 4.71V at 2A (min spec 4.8V)', solution: 'Adjust feedback divider or widen output trace' },
         { severity: 'warning',  component: 'C_BULK', issue: 'Bulk capacitance 100&#181;F insufficient for 20A transients', solution: 'Add 470&#181;F 25V low-ESR near battery input' },
       ] : [
-        { severity: 'error',   component: 'R1',            issue: 'Power rating exceeded: 0.31W actual vs 0.25W rated (124%)', solution: 'Replace R1 with 1/2W 0603 variant (CRCW0603150RFKEC)' },
-        { severity: 'warning', component: 'U1 &middot; Trace T1', issue: 'Trace 0.2mm &#8594; &#916;V = 0.29V at 250mA peak (IPC-2152)', solution: 'Widen T1 to 0.8mm &#8594; &#916;V drops to 0.07V (2.1%)', physics: { current_a: 0.25, voltage_drop_v: 0.29, current_width_mm: 0.2, required_width_mm: 0.8 } },
-        { severity: 'warning', component: 'U2 LDO',         issue: 'Junction temp 78&#176;C at 250mA &#8212; approaching 85&#176;C abs max', solution: 'Add copper pour or 2&#215; thermal vias to GND plane' },
+        { severity: 'error',   component: 'R1',      issue: 'Power rating exceeded: 0.31W actual vs 0.25W rated (124%)', solution: 'Replace R1 with 1/2W 0603 variant (CRCW0603150RFKEC)' },
+        { severity: 'warning', component: 'U1 Trace T1', issue: 'Trace 0.2mm &#8594; &#916;V = 0.29V at 250mA peak (IPC-2152)', solution: 'Widen T1 to 0.8mm &#8594; &#916;V drops to 0.07V (2.1%)', physics: { current_a: 0.25, voltage_drop_v: 0.29, current_width_mm: 0.2, required_width_mm: 0.8 } },
+        { severity: 'warning', component: 'U2 LDO', issue: 'Junction temp 78&#176;C at 250mA &#8212; approaching 85&#176;C abs max', solution: 'Add copper pour or 2&#215; thermal vias to GND plane' },
       ],
     },
     manufacturing_ready: !isDrone,
-    pcb_geometry: { board: { bbox_mm: { width: isDrone ? 80 : 60, height: isDrone ? 60 : 40 } } },
+    pcb_geometry: { board: { bbox_mm: { width: bW, height: bH } } },
   });
 }
 
@@ -4845,6 +5001,19 @@ function makeSvgEl(tag, attrs, cls) {
   if (cls) el.setAttribute('class', cls);
   return el;
 }
+
+// ── DEMO AUTO-BOOT ───────────────────────────────────
+// On first visit (no saved board), auto-load DeskSense demo so visitor sees a
+// real populated 3D board rather than a blank canvas.
+(function() {
+  var hasSaved = !!localStorage.getItem('circuitmecha_board');
+  if (!hasSaved) {
+    setTimeout(function() {
+      if (window._dynamicItemsList && window._dynamicItemsList.length) return; // already loaded
+      window.quickStart('demo:desksense');
+    }, 900);
+  }
+})();
 
 // SVG draw event wiring
 (function() {
