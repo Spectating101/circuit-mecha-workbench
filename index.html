@@ -46,7 +46,7 @@ canvas#pcb-canvas{position:absolute;inset:0;width:100%!important;height:100%!imp
 input[type=file]{display:none}
 
 /* drop hint */
-.drop-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:2px dashed var(--border-hi);border-radius:14px;padding:14px 28px;font-size:10px;font-weight:700;font-family:var(--mono);color:var(--dim);letter-spacing:1px;pointer-events:none;transition:all .2s;opacity:.4;text-align:center;white-space:nowrap}
+.drop-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:2px dashed var(--border-hi);border-radius:14px;padding:14px 28px;font-size:10px;font-weight:700;font-family:var(--mono);color:var(--dim);letter-spacing:1px;pointer-events:none;transition:all .2s;opacity:.75;text-align:center;white-space:nowrap}
 .left.drag-over .drop-hint{border-color:var(--accent);color:var(--accent);opacity:1;background:var(--a06)}
 
 /* scan sweep */
@@ -113,8 +113,8 @@ input[type=file]{display:none}
 .steps-list li{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--std);line-height:1.6}
 .step-num{min-width:18px;height:18px;border-radius:50%;background:var(--c12);border:1px solid var(--c22);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:var(--copper);flex-shrink:0;margin-top:2px;font-family:var(--mono)}
 
-/* starter chips */
-.starters{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 4px}
+/* starter chips — pinned above input, outside scroll */
+.starters{display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;border-top:1px solid var(--border);background:var(--panel);flex-shrink:0}
 .chip{padding:5px 11px;background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:10px;color:var(--std);cursor:pointer;transition:all .1s;white-space:nowrap}
 .chip:hover{border-color:var(--border-hi);color:var(--hd)}
 .chip.pcb-chip{border-color:var(--a12);color:var(--accent)}
@@ -139,6 +139,7 @@ input[type=file]{display:none}
 .comp-label.warn{color:var(--warn);border-color:var(--w22);background:var(--w06)}
 .comp-label.ok{color:var(--accent);border-color:var(--a22);background:var(--a06)}
 
+.vbtn-sep{width:1px;height:16px;background:var(--border);flex-shrink:0;margin:0 2px}
 /* stronger primary CTA */
 .fbar-btn.prim{border-color:var(--a22);background:var(--a06);color:var(--accent)}
 .fbar-btn.prim:hover{background:var(--a12);box-shadow:0 0 14px rgba(0,242,255,.18)}
@@ -396,14 +397,14 @@ input[type=file]{display:none}
   <div class="vtop-right">
     <div class="vbtn" onclick="resetCamera()">FIT</div>
     <div class="vbtn" id="explode-btn" onclick="toggleExplode()">EXPLODE</div>
-    <div class="vbtn" id="draw-btn" onclick="toggleDrawMode()">&#9998; DRAW</div>
-    <div class="vbtn" onclick="document.getElementById('file-inp').click()">&#8593; UPLOAD</div>
-    <div class="vbtn" onclick="window.exportRepairReport && window.exportRepairReport()" title="Export report (Shift+E)">&#8659; REPORT</div>
-    <div class="vbtn" onclick="window.exportFabPackage && window.exportFabPackage()" title="Fab package: Gerbers + BOM + CPL (Shift+G)" style="color:var(--copper)">&#9658; FAB</div>
-    <div class="vbtn" onclick="window.toggleOutliner()" title="Outliner (O)">&#9783;</div>
-    <div class="vbtn" onclick="window.toggleHistPanel()" title="History (H)">&#9719;</div>
-    <div class="vbtn" onclick="window.openCmdPalette()" title="Command Palette (Ctrl+K)">&#8963;</div>
-    <div class="vbtn" id="heat-btn" onclick="window.toggleHeatmap()" title="Thermal heatmap (T)">&#9650; HEAT</div>
+    <div class="vbtn" id="heat-btn" onclick="window.toggleHeatmap()" title="Thermal heatmap (T)">HEAT</div>
+    <div class="vbtn-sep"></div>
+    <div class="vbtn" id="draw-btn" onclick="toggleDrawMode()">DRAW</div>
+    <div class="vbtn" onclick="window.exportRepairReport && window.exportRepairReport()" title="Export report (Shift+E)">REPORT</div>
+    <div class="vbtn" onclick="window.exportFabPackage && window.exportFabPackage()" title="Fab package: Gerbers + BOM + CPL (Shift+G)" style="color:var(--copper)">FAB</div>
+    <div class="vbtn-sep"></div>
+    <div class="vbtn" onclick="window.toggleOutliner()" title="Outliner (O)">LIST</div>
+    <div class="vbtn" onclick="window.openCmdPalette()" title="Command Palette (Ctrl+K)">CMD</div>
   </div>
   <!-- draw toolbar (visible only in draw mode) -->
   <div class="draw-toolbar" id="draw-toolbar">
@@ -563,7 +564,7 @@ input[type=file]{display:none}
   <!-- findings strip — only appears after PCB validation -->
   <div class="findings-strip empty" id="findings-strip">
     <div class="sec">
-      <span id="findings-title">Findings</span>
+      <span id="findings-title">Analysis</span>
       <span class="sec-action" id="autofix-btn" style="display:none" onclick="autoFix()">Auto-fix all</span>
     </div>
     <div class="findings" id="findings"></div>
@@ -571,25 +572,23 @@ input[type=file]{display:none}
 
   <!-- chat -->
   <div class="sec">
-    <span>Circuit-AI</span>
+    <span>Workbench</span>
     <span class="sec-action" onclick="clearChat()">clear</span>
   </div>
   <div class="chat" id="chat">
-    <div class="msg ai" data-by="CIRCUIT-AI">Take what you own. Repair it, upgrade it, splice it, recycle it. Upload two broken keyboards and splice them into one. Extract components from your electronic pile. Redesign around existing hardware. This is how.</div>
-    <div class="starters" id="starters">
-      <div class="chip pcb-chip" onclick="quickStart('action:splice')">&#9973; Splice two devices</div>
-      <div class="chip pcb-chip" onclick="quickStart('action:repair')">&#128736; Repair or upgrade</div>
-      <div class="chip pcb-chip" onclick="quickStart('action:extract')">&#9875; Extract components</div>
-      <div class="chip pcb-chip" onclick="quickStart('build:scratch')">&#9965; New design from scratch</div>
-      <div class="chip pcb-chip" onclick="quickStart('design:reverse')">&#128269; Reverse engineer a board</div>
-      <div class="chip pcb-chip" onclick="quickStart('design:reconfig')">&#9662; Reconfigure a stack</div>
-      <div class="chip pcb-chip" onclick="quickStart('design:enclosure')">&#9633; Design an enclosure</div>
-      <div class="chip pcb-chip" onclick="quickStart('runs:pile')">&#9776; My hardware pile</div>
-    </div>
+    <div class="msg ai" data-by="CIRCUIT-AI">Drop a BOM or board file to inspect it in 3D — or describe what you want to build, repair, or reverse-engineer.</div>
   </div>
+  <div id="starters-slot"><div class="starters" id="starters">
+    <div class="chip pcb-chip" onclick="quickStart('action:repair')">&#128736; Repair / upgrade</div>
+    <div class="chip pcb-chip" onclick="quickStart('build:scratch')">&#9965; New design</div>
+    <div class="chip pcb-chip" onclick="quickStart('action:splice')">&#9973; Splice devices</div>
+    <div class="chip pcb-chip" onclick="quickStart('action:extract')">&#9875; Extract parts</div>
+    <div class="chip pcb-chip" onclick="quickStart('design:reverse')">&#128269; Reverse engineer</div>
+    <div class="chip pcb-chip" onclick="quickStart('design:enclosure')">&#9633; Enclosure</div>
+  </div></div>
   <div class="chat-input">
     <div class="upload-btn" title="Upload .kicad_pcb" onclick="document.getElementById('file-inp').click()">&#128206;</div>
-    <textarea class="chat-ta" id="chat-ta" placeholder="Splice two keyboards, repair a broken screen, extract components, or upgrade what you have&#8230;" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+    <textarea class="chat-ta" id="chat-ta" placeholder="Describe a design, diagnose a fault, or drop a BOM file&#8230;" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
     <button class="chat-send" id="chat-send" onclick="sendChat()">SEND</button>
   </div>
 </aside>
@@ -2393,17 +2392,20 @@ function thinking() {
 function clearChat() {
   var c = document.getElementById('chat');
   c.innerHTML =
-    '<div class="msg ai" data-by="CIRCUIT-AI">Take what you own. Repair it, upgrade it, splice it, recycle it. Upload two broken keyboards and splice them into one. Extract components from your electronic pile. Redesign around existing hardware. This is how.</div>' +
-    '<div class="starters" id="starters">' +
-      '<div class="chip pcb-chip" onclick="quickStart(\'action:splice\')">&#9973; Splice two devices</div>' +
-      '<div class="chip pcb-chip" onclick="quickStart(\'action:repair\')">&#128736; Repair or upgrade</div>' +
-      '<div class="chip pcb-chip" onclick="quickStart(\'action:extract\')">&#9875; Extract components</div>' +
-      '<div class="chip pcb-chip" onclick="quickStart(\'build:scratch\')">&#9965; New design from scratch</div>' +
+    '<div class="msg ai" data-by="CIRCUIT-AI">Drop a BOM or board file to inspect it in 3D \u2014 or describe what you want to build, repair, or reverse-engineer.</div>';
+  // restore starters slot
+  var slot = document.getElementById('starters-slot');
+  if (slot) {
+    slot.style.display = '';
+    slot.innerHTML = '<div class="starters" id="starters">' +
+      '<div class="chip pcb-chip" onclick="quickStart(\'action:repair\')">&#128736; Repair / upgrade</div>' +
+      '<div class="chip pcb-chip" onclick="quickStart(\'build:scratch\')">&#9965; New design</div>' +
+      '<div class="chip pcb-chip" onclick="quickStart(\'action:splice\')">&#9973; Splice devices</div>' +
+      '<div class="chip pcb-chip" onclick="quickStart(\'action:extract\')">&#9875; Extract parts</div>' +
       '<div class="chip pcb-chip" onclick="quickStart(\'design:reverse\')">&#128269; Reverse engineer</div>' +
-      '<div class="chip pcb-chip" onclick="quickStart(\'design:reconfig\')">&#9662; Reconfigure a stack</div>' +
-      '<div class="chip pcb-chip" onclick="quickStart(\'design:enclosure\')">&#9633; Design an enclosure</div>' +
-      '<div class="chip pcb-chip" onclick="quickStart(\'runs:pile\')">&#128465; My hardware pile</div>' +
+      '<div class="chip pcb-chip" onclick="quickStart(\'design:enclosure\')">&#9633; Enclosure</div>' +
     '</div>';
+  }
   startersDismissed = false;
   // restore drop hint visibility only when no board is loaded
   var dh = document.getElementById('drop-hint');
@@ -2412,7 +2414,7 @@ function clearChat() {
   document.getElementById('findings-strip').classList.add('empty');
   document.getElementById('findings').innerHTML = '';
   document.getElementById('autofix-btn').style.display = 'none';
-  document.getElementById('findings-title').textContent = 'Findings';
+  document.getElementById('findings-title').textContent = 'Analysis';
   // reset footer
   document.getElementById('footer-actions').innerHTML = '';
   setStatus('IDLE', 'idle', 'Ready');
@@ -2421,8 +2423,10 @@ function clearChat() {
 function dismissStarters() {
   if (startersDismissed) return;
   startersDismissed = true;
+  var slot = document.getElementById('starters-slot');
+  if (slot) slot.style.display = 'none';
   var s = document.getElementById('starters');
-  if (s) s.remove();
+  if (s && s !== slot) s.remove();
 }
 
 // ── FOOTER ACTIONS ────────────────────────────────────
