@@ -721,8 +721,8 @@ COMPS.forEach(function(c) {
 });
 
 // lights
-scene.add(new THREE.AmbientLight(0x8896aa, 0.92)); // neutral fill — illuminates base colors
-var kl = new THREE.PointLight(0x4d8bf8, 60, 160);
+scene.add(new THREE.AmbientLight(0xb0bcc8, 1.1)); // bright neutral fill
+var kl = new THREE.PointLight(0x4d8bf8, 50, 160);
 kl.position.set(14, 52, 8);
 kl.castShadow = true;
 scene.add(kl);
@@ -873,20 +873,20 @@ var _llmHeightCache = {};
 var _llmLayoutRequested = false;
 
 var _catColors = {
-  ic: 0x1c1c2e,        // dark blue-black epoxy (IC pkg)
-  connector: 0x2c2824, // dark grey-brown plastic
-  resistor: 0x8c6830,  // tan/brown ceramic body
-  capacitor: 0x1a3870, // navy blue electrolytic
-  inductor: 0x4a4820,  // olive-grey ferrite
-  crystal: 0x707068,   // silver-grey metal can
-  diode: 0x5c1818,     // dark red glass body
-  transistor: 0x282c28,// dark SOT body
-  fuse: 0x90703a,      // beige/tan
-  oscillator: 0x282848,// dark blue ceramic
-  relay: 0x3c2040,     // dark purple plastic
-  sensor: 0x203c34,    // dark teal pkg
-  led: 0x182840,       // dark housing
-  mosfet: 0x1c2020,    // dark DPAK
+  ic: 0x18182a,        // near-black blue-epoxy (IC pkg)
+  connector: 0x282420, // very dark grey plastic
+  resistor: 0xb87830,  // bright tan/brown ceramic — MUST stand out
+  capacitor: 0x1e4494, // mid-blue electrolytic
+  inductor: 0x585830,  // olive-grey ferrite
+  crystal: 0x888878,   // silver-grey metal can
+  diode: 0x701010,     // red glass body
+  transistor: 0x303430,// dark package
+  fuse: 0xb09040,      // bright beige/tan
+  oscillator: 0x303058,// dark blue ceramic
+  relay: 0x482050,     // dark purple plastic
+  sensor: 0x205448,    // teal pkg
+  led: 0x142038,       // dark housing
+  mosfet: 0x202828,    // dark DPAK
 };
 var _catH = {
   ic: 2.4, connector: 3.6, resistor: 0.8, capacitor: 2.0,
@@ -1026,7 +1026,7 @@ window.rebuildBoard = function(bomItems, boardW, boardH, verdict, score) {
   boardEdges.scale.set(scaleX, 1, scaleZ);
   boardEdges.position.copy(board.position);
   grid.position.set(boardW / 2, -0.82, boardH / 2);
-  var boardColor = verdict === 'GO' ? 0x0f5a28 : verdict === 'NO_GO' ? 0x5a1414 : 0x1a3c1a;
+  var boardColor = verdict === 'GO' ? 0x082a10 : verdict === 'NO_GO' ? 0x300808 : 0x0a1c0a;
   board.material.color.setHex(boardColor);
 
   // ─ 3. Verdict rim light ─
@@ -1218,7 +1218,7 @@ window.rebuildBoard = function(bomItems, boardW, boardH, verdict, score) {
 };
 
 function _placeComp(item, x, z, w, h, d, colorHex, newMeshMap) {
-  var mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness:0.55, metalness:0.08, emissive: colorHex, emissiveIntensity: 0.4 });
+  var mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness:0.5, metalness:0.05, emissive: colorHex, emissiveIntensity: 0.55 });
   var mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
   mesh.position.set(x, 32, z); // high up — drop animation brings down
   mesh.castShadow = true;
