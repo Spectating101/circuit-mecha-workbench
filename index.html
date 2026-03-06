@@ -2746,14 +2746,14 @@ document.getElementById('chat-ta').addEventListener('keydown', function(e) {
 // ── NOVICE UX HELPERS ─────────────────────────────
 // Help message — shows capabilities in plain language
 function showHelpMessage() {
-  botMsg('<b>Here\'s what I can help you with:</b><br><br>' +
+  chat('<b>Here\'s what I can help you with:</b><br><br>' +
     '&#128203; <b>Load a board</b> — Drop a .csv, .json, or .kicad_pcb file onto the viewer to see it in 3D<br>' +
     '&#128269; <b>Identify parts</b> — Click any component on the board to see what it is and what it does<br>' +
     '&#9888;&#65039; <b>Find design issues</b> — I\'ll automatically flag power, thermal, and manufacturing problems<br>' +
     '&#128736;&#65039; <b>Repair guidance</b> — Describe a broken device and I\'ll suggest what to fix<br>' +
     '&#127959;&#65039; <b>Design a new board</b> — Tell me what you want to build and I\'ll generate a BOM<br>' +
     '&#127358; <b>Demo</b> — Type “show demo board” or click the ▶ chip above to load a sample PCB<br><br>' +
-    '<i>Tip: Switch to <b>NOVICE</b> mode (top-right corner) to see guided prompts and a simpler toolbar.</i>');
+    '<i>Tip: Switch to <b>NOVICE</b> mode (top-right corner) to see guided prompts and a simpler toolbar.</i>', 'ai', 'CIRCUIT-AI');
 }
 
 // Onboarding strip dismiss — persisted in localStorage
