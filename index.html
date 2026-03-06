@@ -201,6 +201,22 @@ input[type=file]{display:none}
 .chat-send{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0 14px;height:30px;font-size:10px;font-weight:800;cursor:pointer;flex-shrink:0;transition:opacity .1s;margin-bottom:1px}
 .chat-send:hover{opacity:.85}
 .chat-send:disabled{opacity:.3;cursor:default}
+/* ── ONBOARDING STRIP ── */
+.onboard-strip{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);z-index:35;background:rgba(17,21,32,.94);border:1px solid var(--border-hi);border-radius:20px;padding:8px 18px;display:none;align-items:center;gap:16px;font-size:10.5px;color:var(--std);backdrop-filter:blur(12px);white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+.onboard-strip b{color:var(--hd)}
+.onboard-dismiss{font-size:9px;color:var(--dim);cursor:pointer;padding:3px 8px;border:1px solid var(--border);border-radius:10px;transition:all .1s;flex-shrink:0}
+.onboard-dismiss:hover{color:var(--hd);border-color:var(--border-hi)}
+/* ── NOVICE SUGGESTION CHIPS ── */
+.suggest-chips{display:none;flex-wrap:wrap;gap:5px;padding:4px 0 3px;align-items:center}
+.schip{font-size:9.5px;padding:4px 11px;border-radius:12px;border:1px solid var(--border-hi);background:var(--card);color:var(--std);cursor:pointer;transition:all .12s;white-space:nowrap}
+.schip:hover{border-color:var(--accent);color:var(--accent);background:var(--a06)}
+/* ── MODE TOGGLE ── */
+.mode-toggle{font-size:8px;font-weight:800;letter-spacing:1.5px;padding:3px 10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--dim);cursor:pointer;transition:all .15s;user-select:none;font-family:var(--mono)}
+.mode-toggle:hover{border-color:var(--border-hi);color:var(--std)}
+.mode-toggle.novice{border-color:var(--s22);background:var(--s06);color:var(--solder)}
+body.novice-mode .vbtn-expert{display:none!important}
+/* ── PLAIN-ENGLISH COMPONENT DESCRIPTION ── */
+.ci-desc{font-size:10px;line-height:1.55;color:var(--std);padding:8px 10px;background:var(--a06);border-radius:6px;border-left:2px solid var(--accent)}
 
 /* ── FOOTER ── */
 .footer{grid-column:1/-1;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:8px;z-index:40;box-shadow:0 -2px 12px rgba(0,0,0,.4)}
@@ -380,6 +396,7 @@ input[type=file]{display:none}
     <div class="pill"><div class="dot dot-live"></div><span id="api-status">CIRCUIT-AI</span></div>
     <div class="pill"><div class="dot dot-ok"></div><span>CEREBRAS</span></div>
     <div class="pill"><div class="dot" id="mfr-dot" style="background:var(--dim)"></div><span id="mfr-lbl">STANDBY</span></div>
+    <div class="mode-toggle" id="mode-toggle" onclick="toggleMode()" title="Switch between Novice (guided) and Expert (full) mode">EXPERT</div>
   </div>
 </header>
 
@@ -389,6 +406,11 @@ input[type=file]{display:none}
   ondragleave="this.classList.remove('drag-over')"
   ondrop="handleDrop(event)">
   <canvas id="pcb-canvas"></canvas>
+  <!-- Onboarding hint strip — shown to new users, dismissed with a click -->
+  <div class="onboard-strip" id="onboard-strip">
+    <span>&#128161; <b>Rotate</b>: drag &nbsp;&middot;&nbsp; <b>Zoom</b>: scroll &nbsp;&middot;&nbsp; <b>Select</b>: click a part &nbsp;&middot;&nbsp; <b>Ask</b>: type in the chat on the right</span>
+    <span class="onboard-dismiss" onclick="dismissOnboard()">Got it &#10005;</span>
+  </div>
   <input type="file" id="file-inp" accept=".kicad_pcb,.net,.csv,.json" onchange="handleFile(this)">
   <div class="board-idle-glow" id="board-glow"></div>
   <div class="comp-labels" id="comp-labels"></div>
@@ -399,12 +421,12 @@ input[type=file]{display:none}
     <div class="vbtn" id="explode-btn" onclick="toggleExplode()">EXPLODE</div>
     <div class="vbtn" id="heat-btn" onclick="window.toggleHeatmap()" title="Thermal heatmap (T)">HEAT</div>
     <div class="vbtn-sep"></div>
-    <div class="vbtn" id="draw-btn" onclick="toggleDrawMode()">DRAW</div>
-    <div class="vbtn" onclick="window.exportRepairReport && window.exportRepairReport()" title="Export report (Shift+E)">REPORT</div>
-    <div class="vbtn" onclick="window.exportFabPackage && window.exportFabPackage()" title="Fab package: Gerbers + BOM + CPL (Shift+G)" style="color:var(--copper)">FAB</div>
-    <div class="vbtn-sep"></div>
-    <div class="vbtn" onclick="window.toggleOutliner()" title="Outliner (O)">LIST</div>
-    <div class="vbtn" onclick="window.openCmdPalette()" title="Command Palette (Ctrl+K)">CMD</div>
+    <div class="vbtn vbtn-expert" id="draw-btn" onclick="toggleDrawMode()">DRAW</div>
+    <div class="vbtn vbtn-expert" onclick="window.exportRepairReport && window.exportRepairReport()" title="Export report (Shift+E)">REPORT</div>
+    <div class="vbtn vbtn-expert" onclick="window.exportFabPackage && window.exportFabPackage()" title="Fab package: Gerbers + BOM + CPL (Shift+G)" style="color:var(--copper)">FAB</div>
+    <div class="vbtn-sep vbtn-expert"></div>
+    <div class="vbtn vbtn-expert" onclick="window.toggleOutliner()" title="Outliner (O)">LIST</div>
+    <div class="vbtn vbtn-expert" onclick="window.openCmdPalette()" title="Command Palette (Ctrl+K)">CMD</div>
   </div>
   <!-- draw toolbar (visible only in draw mode) -->
   <div class="draw-toolbar" id="draw-toolbar">
@@ -520,6 +542,7 @@ input[type=file]{display:none}
     <div class="cam-bk" onclick="window.setCamBookmark('front')" title="Numpad 1">&#8594; FRONT</div>
     <div class="cam-bk" onclick="window.setCamBookmark('iso')" title="Numpad 5">&#9679; ISO</div>
     <div class="cam-bk" onclick="window.setCamBookmark('conn')" title="Numpad 3">&#8615; CONN</div>
+    <div class="cam-bk" id="cam-2d" onclick="window.toggle2D && window.toggle2D()" title="Top-down 2D flat view (hides 3D perspective)">&#9632; 2D</div>
   </div>
   <!-- ── MINIMAP ── -->
   <div class="minimap" id="minimap" title="Board overview (click to reset camera)" onclick="window.resetCamera&&window.resetCamera()" style="display:none">
@@ -586,6 +609,13 @@ input[type=file]{display:none}
     <div class="chip pcb-chip" onclick="quickStart('design:reverse')">&#128269; Reverse engineer</div>
     <div class="chip pcb-chip" onclick="quickStart('design:enclosure')">&#9633; Enclosure</div>
   </div></div>
+  <!-- Novice suggestion chips — visible in novice mode, or always on first visit -->
+  <div class="suggest-chips" id="novice-chips">
+    <div class="schip" onclick="sendSuggest('What does U1 do?')">What does U1 do?</div>
+    <div class="schip" onclick="sendSuggest('demo:desksense')">&#9654; Demo board</div>
+    <div class="schip" onclick="sendSuggest('help')">What can you do?</div>
+    <div class="schip" onclick="sendSuggest('How do I navigate the 3D view?')">How to navigate</div>
+  </div>
   <div class="chat-input">
     <div class="upload-btn" title="Upload .kicad_pcb" onclick="document.getElementById('file-inp').click()">&#128206;</div>
     <textarea class="chat-ta" id="chat-ta" placeholder="Describe a design, diagnose a fault, or drop a BOM file&#8230;" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
@@ -1646,6 +1676,24 @@ window.onCompSelect = function(item) {
   if (!item) return;
   var refs = item.references || [];
   var v = (item.value||'').replace(/['"<>]/g, '');
+  // Plain-English descriptions per category (shown to novice users)
+  var _catDesc = {
+    ic:          'An integrated circuit (IC) — a silicon chip that processes signals or runs firmware on the board.',
+    resistor:    'A resistor controls how much electrical current flows through a part of the circuit.',
+    capacitor:   'A capacitor stores and releases charge. It smooths out voltage ripple and filters noise.',
+    connector:   'A connector provides a physical plug-in point for cables, power, or linking other boards.',
+    inductor:    'An inductor (coil) stores energy in a magnetic field, used in power conversion and filters.',
+    crystal:     'A crystal oscillator provides a precise timing clock signal for the microcontroller.',
+    diode:       'A diode allows current to flow in only one direction — used for protection and rectification.',
+    transistor:  'A transistor acts as an electronic switch or signal amplifier controlling larger currents.',
+    mosfet:      'A MOSFET is a power transistor that efficiently switches or amplifies high currents.',
+    relay:       'A relay is an electrically-controlled switch — a small signal controls a larger circuit.',
+    sensor:      'A sensor converts physical quantities (temperature, light, motion) into electrical signals.',
+    led:         'An LED emits light when current flows through it — used for indicators and status lights.',
+    fuse:        'A fuse breaks the circuit if too much current flows, protecting the rest of the board.',
+    oscillator:  'A clock oscillator generates a precise periodic signal that synchronizes circuit timing.',
+  };
+  var _desc = _catDesc[(item.category||'').toLowerCase()] || '';
   // Derive supplier link — expanded to 12 known distributors + LLM fallback for unknowns
   var _ciSupLink = item.supplier_link || (function() {
     var sup = (item.supplier||'').toLowerCase().replace(/[\s\-_]/g,'');
@@ -1675,6 +1723,7 @@ window.onCompSelect = function(item) {
   window._ciMpn = item.mpn || '';
   document.getElementById('ci-title').textContent = item.value;
   document.getElementById('ci-body').innerHTML =
+    (_desc ? '<div class="ci-desc">' + _desc + '</div>' : '') +
     '<div class="ci-row"><div class="ci-lbl">Value</div><div class="ci-val big">' + item.value + '</div></div>' +
     '<div class="ci-row"><div class="ci-lbl">Category</div><div class="ci-val">' + (item.category||'&#8212;') + '</div></div>' +
     (refs.length ? '<div class="ci-row"><div class="ci-lbl">References (' + refs.length + ')</div><div class="ci-refs">' +
@@ -2505,6 +2554,7 @@ function _llmErrorToast(e) {
 function detectIntentWithRegex(text) {
   // Fallback regex patterns — used when LLM unavailable
   if (text.indexOf('demo:') === 0) return 'demo';
+  if (/^\s*help\s*$/i.test(text) || /what can (you|circuit.ai|this) do|how do(es this|you) work|what.*capable|how.?(do I|to).?(use|start|begin)|how.*rotate.*view|how.*navigate|what.*can.*ask/i.test(text)) return 'help';
   if (text.indexOf('build:') === 0) return 'build';
   if (text.indexOf('design:') === 0) return text.slice(7);
   if (text.indexOf('action:') === 0) return text.slice(7);
@@ -2648,6 +2698,7 @@ window.sendChat = function() {
 
 function routeMessage(text) {
   var intent = detectIntent(text);
+  if (intent === 'help') { showHelpMessage(); return; }
   if (intent === 'demo') { quickStart(text.indexOf('demo:') === 0 ? text : 'demo:desksense'); return; }
   if (intent === 'splice') {
     handleWorkflow(text, 'splice');
@@ -2692,7 +2743,78 @@ document.getElementById('chat-ta').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
 });
 
-// ── BOM FILE PARSER (CSV + JSON) ──────────────────
+// ── NOVICE UX HELPERS ─────────────────────────────
+// Help message — shows capabilities in plain language
+function showHelpMessage() {
+  botMsg('<b>Here\'s what I can help you with:</b><br><br>' +
+    '&#128203; <b>Load a board</b> — Drop a .csv, .json, or .kicad_pcb file onto the viewer to see it in 3D<br>' +
+    '&#128269; <b>Identify parts</b> — Click any component on the board to see what it is and what it does<br>' +
+    '&#9888;&#65039; <b>Find design issues</b> — I\'ll automatically flag power, thermal, and manufacturing problems<br>' +
+    '&#128736;&#65039; <b>Repair guidance</b> — Describe a broken device and I\'ll suggest what to fix<br>' +
+    '&#127959;&#65039; <b>Design a new board</b> — Tell me what you want to build and I\'ll generate a BOM<br>' +
+    '&#127358; <b>Demo</b> — Type “show demo board” or click the ▶ chip above to load a sample PCB<br><br>' +
+    '<i>Tip: Switch to <b>NOVICE</b> mode (top-right corner) to see guided prompts and a simpler toolbar.</i>');
+}
+
+// Onboarding strip dismiss — persisted in localStorage
+function dismissOnboard() {
+  var s = document.getElementById('onboard-strip');
+  if (s) { s.style.transition = 'opacity .3s'; s.style.opacity = '0'; setTimeout(function() { s.style.display = 'none'; }, 320); }
+  try { localStorage.setItem('cmw_onboarded', '1'); } catch(e) {}
+}
+
+// Auto-show onboarding strip unless already dismissed
+(function() {
+  try { if (localStorage.getItem('cmw_onboarded')) return; } catch(e) {}
+  setTimeout(function() {
+    var s = document.getElementById('onboard-strip');
+    if (s) { s.style.display = 'flex'; s.style.opacity = '0'; s.style.transition = 'opacity .5s'; setTimeout(function() { s.style.opacity = '1'; }, 20); }
+  }, 1800);
+})();
+
+// Novice/Expert mode toggle
+var _noviceMode = false;
+function toggleMode() {
+  _noviceMode = !_noviceMode;
+  var lbl = document.getElementById('mode-toggle');
+  if (lbl) { lbl.textContent = _noviceMode ? 'NOVICE' : 'EXPERT'; lbl.classList.toggle('novice', _noviceMode); }
+  var chips = document.getElementById('novice-chips');
+  if (chips) chips.style.display = _noviceMode ? 'flex' : 'none';
+  document.body.classList.toggle('novice-mode', _noviceMode);
+  if (_noviceMode) {
+    // Re-show onboarding strip in novice mode even if previously dismissed
+    var s = document.getElementById('onboard-strip');
+    if (s) { s.style.display = 'flex'; s.style.opacity = '1'; }
+  }
+}
+
+// Send a preset suggestion into the chat
+function sendSuggest(text) {
+  var ta = document.getElementById('chat-ta');
+  if (!ta) return;
+  ta.value = text;
+  ta.dispatchEvent(new Event('input'));
+  window.sendChat && window.sendChat();
+}
+
+// 2D / 3D view toggle — locks camera to top-down orthographic-style view
+var _2dMode = false;
+window.toggle2D = function() {
+  _2dMode = !_2dMode;
+  var btn = document.getElementById('cam-2d');
+  if (_2dMode) {
+    window.setCamBookmark ? window.setCamBookmark('top') : (window._cam && window._cam.position.set(30, 140, 20));
+    // Lock polar angle to top-down
+    if (window._ctrl) { window._ctrl.maxPolarAngle = 0.001; window._ctrl.minPolarAngle = 0; window._ctrl.update(); }
+    if (btn) { btn.textContent = '\u25a0 3D'; btn.classList.add('on'); }
+    window.toast && window.toast('2D top-down view locked — drag to pan, scroll to zoom', 'ok', 2500);
+  } else {
+    if (window._ctrl) { window._ctrl.maxPolarAngle = Math.PI / 2.05; window._ctrl.minPolarAngle = 0; window._ctrl.update(); }
+    if (btn) { btn.textContent = '\u25a0 2D'; btn.classList.remove('on'); }
+    window.setCamBookmark && window.setCamBookmark('iso');
+    window.toast && window.toast('3D perspective view restored', 'ok', 1500);
+  }
+};
 function _parseBOMFile(file, text) {
   var name = file.name.toLowerCase();
   var bomItems = [];
