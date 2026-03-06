@@ -9,14 +9,14 @@
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <style>
 :root {
-  --bg:#050608; --panel:#080b12; --card:#0d1019; --glass:rgba(8,11,18,0.94);
-  --border:#161d2e; --border-hi:#1f2a3f;
-  --accent:#00f2ff; --a06:rgba(0,242,255,0.06); --a12:rgba(0,242,255,0.12); --a22:rgba(0,242,255,0.22);
-  --copper:#f97316; --c06:rgba(249,115,22,0.06); --c12:rgba(249,115,22,0.12); --c22:rgba(249,115,22,0.22);
-  --solder:#10b981; --s06:rgba(16,185,129,0.06); --s12:rgba(16,185,129,0.12); --s22:rgba(16,185,129,0.22);
-  --fail:#ef4444; --f06:rgba(239,68,68,0.06); --f12:rgba(239,68,68,0.12); --f22:rgba(239,68,68,0.22);
-  --warn:#f59e0b; --w06:rgba(245,158,11,0.06); --w12:rgba(245,158,11,0.12); --w22:rgba(245,158,11,0.22);
-  --hd:#dde6f5; --std:#5a6e88; --dim:#2b3649;
+  --bg:#0c0e12; --panel:#111520; --card:#171b27; --glass:rgba(17,21,32,0.95);
+  --border:#1f2537; --border-hi:#2d3650;
+  --accent:#4d8bf8; --a06:rgba(77,139,248,0.06); --a12:rgba(77,139,248,0.12); --a22:rgba(77,139,248,0.24);
+  --copper:#f0883e; --c06:rgba(240,136,62,0.07); --c12:rgba(240,136,62,0.14); --c22:rgba(240,136,62,0.22);
+  --solder:#34d399; --s06:rgba(52,211,153,0.07); --s12:rgba(52,211,153,0.14); --s22:rgba(52,211,153,0.22);
+  --fail:#f87171; --f06:rgba(248,113,113,0.07); --f12:rgba(248,113,113,0.14); --f22:rgba(248,113,113,0.22);
+  --warn:#fbbf24; --w06:rgba(251,191,36,0.07); --w12:rgba(251,191,36,0.14); --w22:rgba(251,191,36,0.22);
+  --hd:#e2e8f5; --std:#8fa3bf; --dim:#3d4f68;
   --ui:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -26,7 +26,7 @@ html,body{height:100%;background:var(--bg);color:var(--std);font-family:var(--ui
 .shell{display:grid;grid-template-columns:1fr 420px;grid-template-rows:48px 1fr 56px;height:100vh;width:100vw}
 
 /* ── HEADER ── */
-.hdr{grid-column:1/-1;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;z-index:40}
+.hdr{grid-column:1/-1;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;z-index:40;box-shadow:0 2px 12px rgba(0,0,0,.45)}
 .logo{font-size:10px;font-weight:900;letter-spacing:4px;color:var(--hd)}
 .logo em{color:var(--accent);font-style:normal}
 .logo-sep{color:var(--dim);font-size:12px;font-weight:300}
@@ -38,7 +38,7 @@ html,body{height:100%;background:var(--bg);color:var(--std);font-family:var(--ui
 .dot-ok{background:var(--solder)}
 .dot-off{background:var(--dim)}
 .dot-warn{background:var(--warn)}
-@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--accent)}50%{opacity:.3;box-shadow:none}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
 /* ── LEFT (3D viewport) ── */
 .left{position:relative;background:var(--bg);overflow:hidden}
@@ -50,13 +50,13 @@ input[type=file]{display:none}
 .left.drag-over .drop-hint{border-color:var(--accent);color:var(--accent);opacity:1;background:var(--a06)}
 
 /* scan sweep */
-.sweep{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent) 40%,var(--accent) 60%,transparent);box-shadow:0 0 18px 5px rgba(0,242,255,.25);z-index:8;display:none}
+.sweep{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent) 40%,var(--accent) 60%,transparent);opacity:.55;z-index:8;display:none}
 .sweep.on{display:block;animation:sweep 2.2s linear infinite}
 @keyframes sweep{from{top:0}to{top:100%}}
 
 /* viewport HUD */
 .vhud{position:absolute;bottom:16px;left:16px;display:flex;gap:8px;z-index:20;flex-wrap:wrap}
-.vcard{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:8px 12px;backdrop-filter:blur(16px)}
+.vcard{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:8px 12px;backdrop-filter:blur(16px);box-shadow:0 4px 16px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04)}
 .vc-lbl{font-size:7px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
 .vc-val{font-size:17px;font-weight:800;font-family:var(--mono);color:var(--hd);line-height:1}
 .vc-sub{font-size:9px;font-family:var(--mono);color:var(--dim);margin-top:2px}
@@ -66,7 +66,7 @@ input[type=file]{display:none}
 .vbtn.on{border-color:var(--a22);color:var(--accent);background:var(--a06)}
 
 /* ── RIGHT PANEL ── */
-.right{background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.right{background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:-4px 0 24px rgba(0,0,0,.35)}
 .sec{padding:7px 14px;font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .sec-action{font-size:9px;font-family:var(--mono);color:var(--accent);background:var(--a06);border:1px solid var(--a12);border-radius:4px;padding:2px 7px;cursor:pointer}
 
@@ -95,7 +95,7 @@ input[type=file]{display:none}
 
 /* chat */
 .chat{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px;min-height:0}
-.msg{padding:9px 11px;border-radius:8px;font-size:12px;line-height:1.65;border:1px solid var(--border)}
+.msg{padding:9px 11px;border-radius:8px;font-size:12px;line-height:1.65;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .msg.ai{background:var(--card);color:var(--hd);border-color:var(--border-hi)}
 .msg.ai::before{content:attr(data-by);display:block;font-size:7px;font-family:var(--mono);font-weight:900;color:var(--accent);margin-bottom:4px;letter-spacing:1px}
 .msg.usr{background:var(--a06);color:var(--accent);border-color:var(--a12);align-self:flex-end;max-width:92%}
@@ -129,7 +129,7 @@ input[type=file]{display:none}
 .badge-warn.active,.badge-err.active{animation:badge-pulse .9s ease-in-out infinite}
 
 /* board idle glow */
-.board-idle-glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:140px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,242,255,.04) 0%,transparent 70%);pointer-events:none;animation:board-idle 4s ease-in-out infinite;z-index:1}
+.board-idle-glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:140px;border-radius:50%;background:radial-gradient(ellipse,rgba(77,139,248,.025) 0%,transparent 70%);pointer-events:none;animation:board-idle 4s ease-in-out infinite;z-index:1}
 @keyframes board-idle{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
 
 /* component labels */
@@ -142,7 +142,7 @@ input[type=file]{display:none}
 .vbtn-sep{width:1px;height:16px;background:var(--border);flex-shrink:0;margin:0 2px}
 /* stronger primary CTA */
 .fbar-btn.prim{border-color:var(--a22);background:var(--a06);color:var(--accent)}
-.fbar-btn.prim:hover{background:var(--a12);box-shadow:0 0 14px rgba(0,242,255,.18)}
+.fbar-btn.prim:hover{background:var(--a12)}
 
 /* chat input focus glow */
 .chat-ta:focus{border-color:var(--a22);box-shadow:0 0 0 2px var(--a06)}
@@ -168,7 +168,7 @@ input[type=file]{display:none}
 .draw-preview{stroke:var(--copper);stroke-width:2;fill:none;opacity:.45;stroke-dasharray:6 3;pointer-events:none}
 
 /* ── REVIEW PANEL ── */
-.review-panel{background:var(--card);border:1px solid var(--border-hi);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:11px}
+.review-panel{background:var(--card);border:1px solid var(--border-hi);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.03)}
 .review-panel h4{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--std);margin:0}
 .review-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .review-score{font-size:22px;font-weight:900;font-family:var(--mono)}
@@ -198,12 +198,12 @@ input[type=file]{display:none}
 .upload-btn:hover{border-color:var(--border-hi)}
 .chat-ta{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--hd);font-family:var(--ui);font-size:12px;outline:none;resize:none;line-height:1.5;transition:border-color .12s,box-shadow .12s;max-height:120px;overflow-y:hidden;min-height:34px}
 .chat-ta::placeholder{color:var(--dim)}
-.chat-send{background:var(--accent);color:#000;border:none;border-radius:8px;padding:0 14px;height:30px;font-size:10px;font-weight:800;cursor:pointer;flex-shrink:0;transition:opacity .1s;margin-bottom:1px}
+.chat-send{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0 14px;height:30px;font-size:10px;font-weight:800;cursor:pointer;flex-shrink:0;transition:opacity .1s;margin-bottom:1px}
 .chat-send:hover{opacity:.85}
 .chat-send:disabled{opacity:.3;cursor:default}
 
 /* ── FOOTER ── */
-.footer{grid-column:1/-1;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:8px;z-index:40}
+.footer{grid-column:1/-1;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:8px;z-index:40;box-shadow:0 -2px 12px rgba(0,0,0,.4)}
 .f-status{font-size:9px;font-family:var(--mono);display:flex;align-items:center;gap:6px;margin-right:auto}
 .f-badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:12px;font-family:var(--mono)}
 .badge-ok{background:var(--s12);color:var(--solder);border:1px solid var(--s22)}
@@ -705,7 +705,7 @@ COMPS.forEach(function(c) {
 
 // traces
 [
-  [[[30,20],[4,20]], 0x00f2ff, 0.11],
+  [[[30,20],[4,20]], 0x4d8bf8, 0.11],
   [[[12,10],[30,10],[30,20]], 0xef4444, 0.22],
   [[[30,20],[42,28]], 0x10b981, 0.11],
   [[[30,20],[20,10]], 0xf59e0b, 0.09],
@@ -722,7 +722,7 @@ COMPS.forEach(function(c) {
 
 // lights
 scene.add(new THREE.AmbientLight(0x070710, 2.4));
-var kl = new THREE.PointLight(0x00f2ff, 90, 140);
+var kl = new THREE.PointLight(0x4d8bf8, 90, 140);
 kl.position.set(14, 52, 8);
 kl.castShadow = true;
 scene.add(kl);
@@ -736,7 +736,7 @@ scene.add(dir);
 // selection ring
 var ring = new THREE.Mesh(
   new THREE.RingGeometry(0.85, 1.25, 32),
-  new THREE.MeshBasicMaterial({ color: 0x00f2ff, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
+  new THREE.MeshBasicMaterial({ color: 0x4d8bf8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
 );
 ring.rotation.x = -Math.PI / 2;
 ring.visible = false;
@@ -1113,7 +1113,7 @@ window.rebuildBoard = function(bomItems, boardW, boardH, verdict, score) {
   });
 
   // ─ 6. Traces: initial structural pairs drawn immediately; LLM upgrades async ─
-  var traceColors = [0x00f2ff, 0x10b981, 0xf97316, 0xf59e0b, 0x8b5cf6, 0x06b6d4];
+  var traceColors = [0x4d8bf8, 0x34d399, 0xf0883e, 0xfbbf24, 0x8b5cf6, 0x22d3ee];
   window._traceObjects = []; // expose so LLM callback can clear and redraw
   window._currentMeshMap = newMeshMap; // expose for LLM trace upgrade
   window._currentDynamicGroup = dynamicGroup; // expose for LLM to add to
@@ -1243,7 +1243,7 @@ function requestLLMTracePairs(bom, meshMap) {
     'Focus on: power rails, data buses (SPI/I2C/UART/USB), control signals, decoupling.\n' +
     'BOM: ' + JSON.stringify(bomSummary) + '\n\n' +
     'Respond ONLY as a JSON array (max 12 pairs), no markdown, no explanation:\n' +
-    '[{"a":"U1","b":"J1","net":"USB_DATA","color":"#00f2ff"},{"a":"U1","b":"C1","net":"VCC_BYPASS","color":"#10b981"}]';
+    '[{"a":"U1","b":"J1","net":"USB_DATA","color":"#4d8bf8"},{"a":"U1","b":"C1","net":"VCC_BYPASS","color":"#34d399"}]';
 
   fetch(_intentLLMUrl, {
     method: 'POST',
@@ -1284,7 +1284,7 @@ function requestLLMTracePairs(bom, meshMap) {
       var curve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(ax, 1.72, az), new THREE.Vector3(jx, 1.72, jz), new THREE.Vector3(bx, 1.72, bz)
       ]);
-      var colorHex = parseInt((pair.color||'#00f2ff').replace('#',''), 16);
+      var colorHex = parseInt((pair.color||'#4d8bf8').replace('#',''), 16);
       var tr = new THREE.Mesh(
         new THREE.TubeGeometry(curve, 28, 0.15, 3, false),
         new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.78 })
@@ -2077,7 +2077,7 @@ window.setShadeMode = function(mode) {
       if (_legLo) _legLo.textContent = 'PASS'; if (_legHi) _legHi.textContent = 'HIGH RISK';
     } else if (mode === 'xray') {
       _legEl.style.display = 'flex';
-      if (_legBar) _legBar.style.background = 'linear-gradient(90deg,rgba(0,242,255,0.28),rgba(0,242,255,0.28))';
+      if (_legBar) _legBar.style.background = 'linear-gradient(90deg,rgba(77,139,248,0.18),rgba(77,139,248,0.28))';
       if (_legLo) _legLo.textContent = 'X-RAY'; if (_legHi) _legHi.textContent = 'SEE-THRU';
     } else {
       _legEl.style.display = 'none';
@@ -2272,7 +2272,7 @@ function compareRuns(idA, idB) {
 }
 
 // ── MINIMAP ───────────────────────────────────────────
-var _catColorMap = { ic:'#00f2ff', connector:'#f97316', resistor:'#10b981', capacitor:'#10b981', inductor:'#8b5cf6', crystal:'#ec4899', diode:'#f59e0b', transistor:'#f59e0b', other:'#5a6e88' };
+var _catColorMap = { ic:'#4d8bf8', connector:'#f0883e', resistor:'#34d399', capacitor:'#34d399', inductor:'#8b5cf6', crystal:'#ec4899', diode:'#fbbf24', transistor:'#fbbf24', other:'#8fa3bf' };
 window.updateMinimap = function(bW, bH) {
   var canvas = document.getElementById('minimap-canvas');
   if (!canvas) return;
@@ -2299,13 +2299,13 @@ window.updateMinimap = function(bW, bH) {
     var col = _catColorMap[cat] || '#5a6e88';
     ctx.beginPath();
     ctx.arc(mx, mz, isSel ? 3.5 : 1.8, 0, Math.PI * 2);
-    if (isSel) { ctx.shadowColor = '#00f2ff'; ctx.shadowBlur = 6; }
+    if (isSel) { ctx.shadowColor = '#4d8bf8'; ctx.shadowBlur = 4; }
     ctx.fillStyle = isSel ? '#ffffff' : col;
     ctx.fill();
     ctx.shadowBlur = 0;
   });
   // viewport frame (indicative)
-  ctx.strokeStyle = 'rgba(0,242,255,0.15)';
+  ctx.strokeStyle = 'rgba(77,139,248,0.18)';
   ctx.lineWidth = 0.5;
   ctx.strokeRect(3, 3, W-6, H-6);
 };
@@ -3962,7 +3962,7 @@ window.exportRepairReport = function() {
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
     '<title>' + projName + ' — Circuit-AI Report</title>' +
     '<style>body{font-family:Inter,system-ui,sans-serif;background:#050608;color:#dde6f5;margin:0;padding:32px}' +
-    '.h1{font-size:22px;font-weight:800;color:#00f2ff;letter-spacing:2px;margin-bottom:4px}' +
+    '.h1{font-size:22px;font-weight:800;color:#4d8bf8;letter-spacing:2px;margin-bottom:4px}' +
     '.sub{font-size:11px;color:#5a6e88;margin-bottom:32px}' +
     '.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}' +
     '.kvc{background:#080b12;border:1px solid #161d2e;border-radius:8px;padding:14px 18px}' +
