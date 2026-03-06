@@ -2757,7 +2757,7 @@ function showHelpMessage() {
 }
 
 // Onboarding strip dismiss — persisted in localStorage
-function dismissOnboard() {
+window.dismissOnboard = function() {
   var s = document.getElementById('onboard-strip');
   if (s) { s.style.transition = 'opacity .3s'; s.style.opacity = '0'; setTimeout(function() { s.style.display = 'none'; }, 320); }
   try { localStorage.setItem('cmw_onboarded', '1'); } catch(e) {}
@@ -2774,7 +2774,7 @@ function dismissOnboard() {
 
 // Novice/Expert mode toggle
 var _noviceMode = false;
-function toggleMode() {
+window.toggleMode = function() {
   _noviceMode = !_noviceMode;
   var lbl = document.getElementById('mode-toggle');
   if (lbl) { lbl.textContent = _noviceMode ? 'NOVICE' : 'EXPERT'; lbl.classList.toggle('novice', _noviceMode); }
@@ -2789,7 +2789,7 @@ function toggleMode() {
 }
 
 // Send a preset suggestion into the chat
-function sendSuggest(text) {
+window.sendSuggest = function(text) {
   var ta = document.getElementById('chat-ta');
   if (!ta) return;
   ta.value = text;
