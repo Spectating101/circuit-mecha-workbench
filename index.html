@@ -664,15 +664,15 @@ scene.add(grid);
 });
 
 var COMPS = [
-  { ref: 'U1', x: 30, z: 20, w: 16, d: 22, h: 2.8, base: 0x1c1c2e, warn: true },
-  { ref: 'U2', x: 12, z: 10, w: 5,  d: 5,  h: 2.0, base: 0x252525 },
+  { ref: 'U1', x: 30, z: 20, w: 16, d: 22, h: 2.8, base: 0x404068, warn: true },
+  { ref: 'U2', x: 12, z: 10, w: 5,  d: 5,  h: 2.0, base: 0x3a3a5e },
   { ref: 'R1', x: 20, z: 10, w: 1.8,d: 1.2,h: 0.8, base: 0x8c6830, err: true },
   { ref: 'C1', x: 42, z: 28, w: 1.8,d: 1.2,h: 1.8, base: 0x1a3870 },
-  { ref: 'J1', x:  4, z: 20, w: 8,  d: 6,  h: 3.4, base: 0x303028 },
+  { ref: 'J1', x:  4, z: 20, w: 8,  d: 6,  h: 3.4, base: 0x4a3c30 },
 ];
 var meshMap = {};
 COMPS.forEach(function(c) {
-  var color = c.err ? 0x4a1010 : c.warn ? 0x302010 : c.base;
+  var color = c.err ? 0x5a1818 : c.base; // warn uses base color (glow shows warning state)
   var m = new THREE.Mesh(
     new THREE.BoxGeometry(c.w, c.h, c.d),
     new THREE.MeshStandardMaterial({ color: color, roughness: 0.55, metalness: 0.08, emissive: color, emissiveIntensity: 0.4 })
@@ -819,7 +819,7 @@ function updateLabels() {
   var w = vp.clientWidth, h = vp.clientHeight;
   LABEL_DEFS.forEach(function(ld) {
     var mesh = meshMap[ld.ref];
-    if (!mesh) return;
+    if (!mesh || !mesh.visible) { if (labelDivs[ld.ref]) labelDivs[ld.ref].style.display = 'none'; return; }
     _v3.setFromMatrixPosition(mesh.matrixWorld);
     _v3.y += mesh.userData.h + 1.2;
     _v3.project(cam);
@@ -873,20 +873,20 @@ var _llmHeightCache = {};
 var _llmLayoutRequested = false;
 
 var _catColors = {
-  ic: 0x18182a,        // near-black blue-epoxy (IC pkg)
-  connector: 0x282420, // very dark grey plastic
+  ic: 0x404068,        // visible slate-blue epoxy (IC pkg) — distinct from green board
+  connector: 0x4a3c30, // warm dark brown plastic — visible on board
   resistor: 0xb87830,  // bright tan/brown ceramic — MUST stand out
   capacitor: 0x1e4494, // mid-blue electrolytic
   inductor: 0x585830,  // olive-grey ferrite
   crystal: 0x888878,   // silver-grey metal can
-  diode: 0x701010,     // red glass body
-  transistor: 0x303430,// dark package
+  diode: 0x902828,     // medium red glass body
+  transistor: 0x404840,// visible dark green-grey pkg
   fuse: 0xb09040,      // bright beige/tan
-  oscillator: 0x303058,// dark blue ceramic
-  relay: 0x482050,     // dark purple plastic
-  sensor: 0x205448,    // teal pkg
-  led: 0x142038,       // dark housing
-  mosfet: 0x202828,    // dark DPAK
+  oscillator: 0x4040a0,// visible blue ceramic
+  relay: 0x6030a0,     // medium purple plastic
+  sensor: 0x307060,    // teal pkg — visible
+  led: 0x1e306e,       // dark blue housing
+  mosfet: 0x305038,    // visible green-grey DPAK
 };
 var _catH = {
   ic: 2.4, connector: 3.6, resistor: 0.8, capacitor: 2.0,
