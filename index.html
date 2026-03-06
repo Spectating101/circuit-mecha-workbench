@@ -5003,16 +5003,13 @@ function makeSvgEl(tag, attrs, cls) {
 }
 
 // ── DEMO AUTO-BOOT ───────────────────────────────────
-// On first visit (no saved board), auto-load DeskSense demo so visitor sees a
-// real populated 3D board rather than a blank canvas.
+// Always auto-load DeskSense demo if no board is loaded after init —
+// unconditional so every visitor sees a real populated 3D board on load.
 (function() {
-  var hasSaved = !!localStorage.getItem('circuitmecha_board');
-  if (!hasSaved) {
-    setTimeout(function() {
-      if (window._dynamicItemsList && window._dynamicItemsList.length) return; // already loaded
-      window.quickStart('demo:desksense');
-    }, 900);
-  }
+  setTimeout(function() {
+    if (window._dynamicItemsList && window._dynamicItemsList.length) return;
+    window.quickStart('demo:desksense');
+  }, 800);
 })();
 
 // SVG draw event wiring
