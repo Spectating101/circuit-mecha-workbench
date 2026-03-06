@@ -1521,7 +1521,7 @@ function requestBulkCostScores(items) {
   .catch(function(e) { console.log('[Cost] LLM request failed:', e.message); });
 }
 
-
+function _heatColor(w) {
   if (w >= 0.80) return [255,  18,   0];
   if (w >= 0.60) return [255, 105,   0];
   if (w >= 0.40) return [255, 195,   0];
@@ -3715,7 +3715,7 @@ window._submitReview = function(status, rid) {
     window.pushHistory('review', (status==='passed'?'Approved':'Rejected') + ' · ' + rid.slice(-8), rid);
     window.toast('Review submitted: ' + status.toUpperCase(), status==='passed'?'ok':'warn', 2800);
     setStatus(status==='passed'?'APPROVED':status==='failed'?'REJECTED':'ITERATING', status==='passed'?'ok':status==='failed'?'err':'warn', rid);
-  }))
+  })
   .catch(function(e) { chat('Bench validation error: ' + e.message, 'ai', 'BENCH'); });
 };
 
@@ -4165,7 +4165,6 @@ window.exportFabPackage = function() {
   );
   window.toast && window.toast('\u2713 ' + name + '-fab.zip \u2014 ' + files.length + ' files packaged', 'ok', 3500);
 };
-}
 
 // ── REPAIR/SPLICE/EXTRACT WORKFLOWS ──────────────────
 function handleWorkflow(text, wtype) {
