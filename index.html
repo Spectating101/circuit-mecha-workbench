@@ -2761,7 +2761,7 @@ window.dismissOnboard = function() {
   var s = document.getElementById('onboard-strip');
   if (s) { s.style.transition = 'opacity .3s'; s.style.opacity = '0'; setTimeout(function() { s.style.display = 'none'; }, 320); }
   try { localStorage.setItem('cmw_onboarded', '1'); } catch(e) {}
-}
+};
 
 // Auto-show onboarding strip unless already dismissed
 (function() {
