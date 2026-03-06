@@ -378,7 +378,7 @@ input[type=file]{display:none}
   <div class="hdr-right">
     <div class="pill"><div class="dot dot-live"></div><span id="api-status">CIRCUIT-AI</span></div>
     <div class="pill"><div class="dot dot-ok"></div><span>CEREBRAS</span></div>
-    <div class="pill"><div class="dot dot-off" id="mfr-dot"></div><span id="mfr-lbl">NOT READY</span></div>
+    <div class="pill"><div class="dot" id="mfr-dot" style="background:var(--dim)"></div><span id="mfr-lbl">STANDBY</span></div>
   </div>
 </header>
 
@@ -2783,6 +2783,9 @@ function handleNewDesign(prompt_) {
       document.getElementById('hud-count-sub').textContent = '~$' + (_ce1 < 1000 ? _ce1.toFixed(2) : Math.round(_ce1)) + ' est.';
     }
     setStatus('NEW DESIGN', 'ok', bomItems.length + ' parts');
+    var _mfrD1 = document.getElementById('mfr-dot'), _mfrL1 = document.getElementById('mfr-lbl');
+    if (_mfrD1) { _mfrD1.className = 'dot dot-ok'; }
+    if (_mfrL1) { _mfrL1.textContent = 'FAB READY'; }
     chat(
       '&#9965; <strong>New board generated</strong> — <strong>' + bomItems.length + ' components</strong><br>' +
       '<span style="font-size:10px;color:var(--dim)">3D view built. Ask me to add parts, swap the MCU, add connectors, optimize power, etc.</span>',
@@ -2842,6 +2845,9 @@ window.handleFile = function(inp) {
         document.getElementById('hud-count-sub').textContent = '~$' + (_ce2 < 1000 ? _ce2.toFixed(2) : Math.round(_ce2)) + ' est.';
       }
       setStatus('BOM LOADED', 'ok', result.bomItems.length + ' parts');
+      var _mfrD2 = document.getElementById('mfr-dot'), _mfrL2 = document.getElementById('mfr-lbl');
+      if (_mfrD2) { _mfrD2.className = 'dot dot-ok'; }
+      if (_mfrL2) { _mfrL2.textContent = 'FAB READY'; }
     };
     reader.readAsText(currentFile);
     return;
@@ -2929,7 +2935,7 @@ function applyValidation(data) {
 
   var dot = document.getElementById('mfr-dot');
   dot.className = 'dot ' + (mfrReady ? 'dot-ok' : 'dot-warn');
-  document.getElementById('mfr-lbl').textContent = mfrReady ? 'MFR READY' : 'NOT READY';
+  document.getElementById('mfr-lbl').textContent = mfrReady ? 'MFR READY' : 'DFM REVIEW';
 
   if (errs > 0) setStatus('ERRORS', 'err', errs + ' error(s), ' + warns + ' warning(s)');
   else if (warns > 0) setStatus('WARNINGS', 'warn', warns + ' warning(s)');
@@ -4492,7 +4498,20 @@ function requestSupplierURLAsync(supplierName, partNumber, callback) {
 // ── EXPORT ACTIONS ────────────────────────────────────
 window.buildPackage = function() {
   if (!currentRunId) {
-    chat('Load a run first to access its manufacturing package.<br><button class="review-submit pend" style="font-size:9px;margin-top:8px" onclick="loadRecentRuns()">&#9776; Browse runs</button>', 'ai', 'MANUFACTURE');
+    // No backend run — offer client-side fab package instead
+    if (window._dynamicItemsList && window._dynamicItemsList.length) {
+      chat('No run ID loaded, but a board is in view. Exporting client-side fab package…', 'ai', 'MANUFACTURE');
+      window.exportFabPackage && window.exportFabPackage();
+    } else {
+      chat(
+        'No board loaded yet. Load a BOM, drop a .csv/.json, or start a new design — then hit <strong>FAB</strong> to export Gerbers + JLCPCB files.' +
+        '<br><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="review-submit pend" style="font-size:9px" onclick="handleNewDesign()">&#9965; New design</button>' +
+        '<button class="review-submit pend" style="font-size:9px" onclick="document.getElementById(\u0027file-inp\u0027).click()">&#128193; Load BOM file</button>' +
+        '</div>',
+        'ai', 'MANUFACTURE'
+      );
+    }
     return;
   }
   // Download all key manufacturing artifacts from the run
@@ -4517,7 +4536,11 @@ window.buildPackage = function() {
 };
 
 window.exportGerbers = function() {
-  chat('<strong>Gerbers</strong> are generated from the mint pipeline.<br>Minting a board creates all manufacturing outputs including the enclosure STL and BOM.<br><button class="review-submit pend" style="font-size:9px;margin-top:8px" onclick="loadRecentRuns()">&#9776; Browse runs for files</button>', 'ai', 'GERBER');
+  if (window.exportFabPackage) {
+    window.exportFabPackage();
+  } else {
+    chat('Fab package not ready — load a BOM or design a board first.', 'ai', 'GERBER');
+  }
 };
 
 window.exportBOM = function() { window.exportRunBOM(); };
